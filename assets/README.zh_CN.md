@@ -8,6 +8,23 @@
 
 ## 字库（fonts）
 
+星桥接线使用 `fonts/starbridge_12.c` 和 `fonts/starbridge_16.c`，位图子集命名为
+Starbridge，来源为[霞鹜文楷屏幕阅读版 v1.522](https://github.com/lxgw/LxgwWenKai-Screen/releases/tag/v1.522)。
+采用 SIL OFL 1.1，版权与许可见 `fonts/OFL-WenKai.txt`。以屏幕阅读字重替换思源黑体，
+保留 12/16 像素字号，并用 4 位灰度平滑笔画。生成的 C 数组存放在闪存中，不需要
+为整份字体分配 RAM。仅嵌入界面字符和可打印 ASCII。
+
+从上述发布页下载 `LXGWWenKaiScreen.ttf`，修改界面文字后重新生成：
+
+```bash
+python3 tools/generate_starbridge_fonts.py --font /path/to/LXGWWenKaiScreen.ttf
+python3 tools/generate_starbridge_fonts.py --check
+```
+
+转换器固定为 `lv_font_conv@1.5.3`，脚本校验源文件 SHA-256：
+`cd1a6fa39c4ea42fd8f4e289945789b0e510cf7016435640f8893cdad9b220f3`。
+构建已提交的 C 子集不需要下载约 25 MB 的原始字库。
+
 可复用的字库文件与生成的字库源码放在 `fonts/`。
 
 - 命名要能反映字族、字重、字级与格式。
@@ -32,3 +49,6 @@
 - 与当前 BSP 音频路径匹配时优先采用 16 kHz、16 位单声道 PCM。
 - 嵌入音频前评估 Flash 与内部 RAM 成本；长录音应流式或分块。
 - 无再分发许可不提交媒体文件。
+
+Starbridge 的原创旋律与音效由 `main/starbridge_sound.c` 实时合成，采用本仓库 MIT 许可；
+`tools/render_starbridge_audio.py` 可生成试听 WAV，输出到忽略的 `delivery/` 目录。

@@ -10,6 +10,25 @@ Keep each asset in the matching subdirectory and document its destination, namin
 
 ## Fonts
 
+Starbridge uses `fonts/starbridge_12.c` and `fonts/starbridge_16.c`, bitmap
+subsets named Starbridge, derived from [LXGW WenKai Screen v1.522](https://github.com/lxgw/LxgwWenKai-Screen/releases/tag/v1.522)
+(SIL OFL 1.1; copyright and license in `fonts/OFL-WenKai.txt`). The screen-reading
+weight replaces Source Han Sans while retaining 12/16 px sizes; 4-bit grayscale
+smooths the strokes. Generated C arrays live in Flash and need no font-sized
+RAM allocation. Only UI glyphs and printable ASCII are embedded.
+
+Download `LXGWWenKaiScreen.ttf` from the release above, then regenerate after
+changing UI text:
+
+```bash
+python3 tools/generate_starbridge_fonts.py --font /path/to/LXGWWenKaiScreen.ttf
+python3 tools/generate_starbridge_fonts.py --check
+```
+
+The generator pins `lv_font_conv@1.5.3` and verifies source SHA-256
+`cd1a6fa39c4ea42fd8f4e289945789b0e510cf7016435640f8893cdad9b220f3`.
+The original 25 MB font is not needed to build the committed C subsets.
+
 Store reusable font files and generated font sources in `fonts/`.
 
 - Use descriptive names that include the family, weight, size, and format when relevant.
@@ -34,3 +53,7 @@ Store reusable music and sound-effect sources in `music/`.
 - Prefer 16 kHz, 16-bit mono PCM when it matches the current BSP audio path.
 - Check Flash and internal-RAM cost before embedding audio; stream or chunk long recordings.
 - Do not commit media without redistribution permission.
+
+Starbridge music and chimes are original compositions synthesized by
+`main/starbridge_sound.c` under this repository’s MIT license.
+`tools/render_starbridge_audio.py` exports a preview WAV to ignored `delivery/`.

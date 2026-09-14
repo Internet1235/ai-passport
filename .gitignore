@@ -1,4 +1,6 @@
 build/
+build-dev/
+delivery/
 sdkconfig
 sdkconfig.old
 managed_components/

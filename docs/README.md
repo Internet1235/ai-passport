@@ -2,6 +2,8 @@
 
 English | [简体中文](README.zh_CN.md)
 
+Current application: [Starbridge — controls, build and device tests](starbridge.md).
+
 FoloToy AI Passport is open wearable AI hardware. This repository is the development baseline for the device. It keeps the **hardware facts, stable interfaces, resource boundaries, reference implementations, and validation methods** needed to build applications in one place.
 
 The repository is organized around the following principles:

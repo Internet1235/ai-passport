@@ -37,6 +37,15 @@ int main(void) {
     sb_synth_render(&a, whole, 1024);
     for (unsigned i = 0; i < 1024; i += 64) sb_synth_render(&b, split + i, 64);
     assert(memcmp(whole, split, sizeof(whole)) == 0);
+    // Removed menu/selection/hint/undo IDs must not add sound or duck the music.
+    const unsigned removed[] = {1, 4, 5, 6};
+    for (unsigned id = 0; id < sizeof(removed) / sizeof(removed[0]); ++id) {
+        sb_synth_init(&a); sb_synth_init(&b);
+        sb_synth_volume(&a, 3, true); sb_synth_volume(&b, 3, true);
+        sb_synth_effect(&b, (sb_sound)removed[id]);
+        sb_synth_render(&a, whole, 1024); sb_synth_render(&b, split, 1024);
+        assert(memcmp(whole, split, sizeof(whole)) == 0);
+    }
     printf("Starbridge audio: 120 s mixed playback, headroom, DC, mute and chunking PASS (peak=%d)\n", peak);
     return 0;
 }

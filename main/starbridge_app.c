@@ -199,7 +199,7 @@ static void mark_dirty(void) { dirty = true; save_due = esp_timer_get_time() + 1
 
 static void toggle_sound(void) {
     sound_level = (sound_level + 1) % 5;
-    sb_audio_update(sound_level, mode == PLAY, SB_CONFIRM);
+    sb_audio_update(sound_level, mode == PLAY, SB_SILENT);
     mark_dirty(); save();
 }
 
@@ -406,17 +406,13 @@ void app_main(void) {
                 }
                 int before_mode = mode;
                 unsigned before_moves = game.moves, before_hints = game.hints;
-                unsigned before_power = sb_powered_count(&game), before_history = game.history_count;
+                unsigned before_power = sb_powered_count(&game);
                 key(in.key, in.event);
                 if (in.event != BSP_BTN_PRESS) {
                     sb_sound effect = SB_SILENT;
                     if (mode == VICTORY && before_mode != VICTORY) effect = SB_WIN;
-                    else if (before_mode == PLAY && game.hints != before_hints) effect = SB_HINT;
-                    else if (before_mode == PLAY && game.moves != before_moves)
+                    else if (before_mode == PLAY && game.hints == before_hints && game.moves != before_moves)
                         effect = sb_powered_count(&game) > before_power ? SB_CONNECT : SB_TURN;
-                    else if (before_mode == PLAY && game.history_count < before_history) effect = SB_UNDO;
-                    else if (mode != before_mode) effect = SB_CONFIRM;
-                    else if (in.key != BSP_BTN_OK && in.event != BSP_BTN_LONG) effect = SB_TICK;
                     sb_audio_update(sound_level, mode == PLAY, effect);
                 }
                 if (in.event != BSP_BTN_PRESS) refresh();

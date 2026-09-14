@@ -16,8 +16,9 @@ static const uint8_t chords[8][4] = {
     {57,60,64,69}, {52,59,64,67}, {53,60,65,69}, {48,60,64,67}
 };
 static const uint8_t effects[SB_SOUND_COUNT][5] = {
-    {0}, {79,0}, {72,79,0}, {76,79,84,0}, {72,76,81,0},
-    {76,72,0}, {72,76,0}, {72,76,79,84,0}
+    [SB_TURN] = {72,79,0},
+    [SB_CONNECT] = {76,79,84,0},
+    [SB_WIN] = {72,76,79,84,0}
 };
 
 static void note(sb_voice *v, unsigned midi, int gain) {
@@ -33,8 +34,7 @@ void sb_synth_volume(sb_synth *s, unsigned level, bool playing) {
 }
 
 void sb_synth_effect(sb_synth *s, sb_sound effect) {
-    if (effect <= SB_SILENT || effect >= SB_SOUND_COUNT || !s->target) return;
-    if (s->effect == SB_WIN && effect == SB_TICK) return;
+    if ((effect != SB_TURN && effect != SB_CONNECT && effect != SB_WIN) || !s->target) return;
     s->effect = effect; s->effect_age = 0; s->effect_step = 0;
 }
 
@@ -65,7 +65,7 @@ void sb_synth_render(sb_synth *s, int16_t *pcm, size_t samples) {
             if (!midi) s->effect = SB_SILENT;
             else {
                 note(&s->voices[3 + s->effect_step % 3], midi,
-                     s->effect == SB_TICK ? 900 : s->effect == SB_TURN ? 1680 : 2400);
+                     s->effect == SB_TURN ? 588 : 2400);
                 ++s->effect_step;
             }
         }

@@ -4,8 +4,9 @@
 #include <stdint.h>
 
 #define SB_SOUND_RATE 16000
-typedef enum { SB_SILENT, SB_TICK, SB_TURN, SB_CONNECT, SB_HINT, SB_UNDO,
-               SB_CONFIRM, SB_WIN, SB_SOUND_COUNT } sb_sound;
+// Keep diagnostic IDs stable across firmware revisions.
+typedef enum { SB_SILENT = 0, SB_TURN = 2, SB_CONNECT = 3,
+               SB_WIN = 7, SB_SOUND_COUNT = 8 } sb_sound;
 typedef struct {
     uint32_t phase, increment, age;
     int32_t envelope, gain;

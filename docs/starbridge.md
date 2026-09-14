@@ -5,7 +5,8 @@ English | [简体中文](starbridge.zh_CN.md)
 Rotate tracks to power every star from the gold source. Thirty deterministic,
 solvable puzzles progress from 3-by-3 (levels 1–10) to 4-by-4 (11–30).
 The application is entirely offline, with a gentle original music-box loop and
-short chimes for selection, rotation, connection, hints, undo, confirmation and victory.
+quiet rotation chimes and brighter connection/victory chimes. Menu navigation,
+cell selection, hints and undo have no sound effects.
 
 | Input | Action |
 | --- | --- |
@@ -68,7 +69,8 @@ erase NVS on initialization errors.
 
 Host tests cover all 30 solutions, rotations, cursor wrap, scoring, hints,
 bounded undo, round-trip saves and corruption at every byte. Audio tests cover
-two minutes of mixed music/effects, headroom, DC offset, mute and chunk invariance. USB tests exercise
+two minutes of mixed music/effects, headroom, DC offset, mute, chunk invariance
+and suppression of removed interface sounds. USB tests exercise
 the actual firmware through the same dispatch as physical keys. They do not
 certify physical switch feel, panel optics or battery life.
 

@@ -33,7 +33,7 @@ void effect(unsigned kind) { sb_synth_effect(&synth, (sb_sound)kind); }
         out.setparams((1, 2, 16000, 0, 'NONE', 'not compressed'))
         block = (ctypes.c_int16 * 1600)()
         for index in range(200):
-            if args.effects and index in range(20, 160, 20): synth.effect(index // 20)
+            if args.effects and index in (20, 60, 100): synth.effect({20: 2, 60: 3, 100: 7}[index])
             synth.render(block, len(block))
             out.writeframes(bytes(block))
 print(args.output)

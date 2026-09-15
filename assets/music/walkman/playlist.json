@@ -1,0 +1,134 @@
+[
+  {
+    "cue_start": 0,
+    "cue_count": 13,
+    "title": "今天的你超棒哒",
+    "caption": "今天也要多夸夸自己！这么可爱又厉害的你，值得一整天的好心情。",
+    "offset": 0,
+    "samples": 432000,
+    "bytes": 235102,
+    "source": "User-approved text; Microsoft zh-CN-XiaoyiNeural; rate +7%, pitch +4Hz; long silences shortened",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  },
+  {
+    "cue_start": 13,
+    "cue_count": 5,
+    "title": "超棒印章",
+    "caption": "叮咚！今天也有认真生活呢，给你盖一个，超棒印章！哪怕只完成一件小事，也值得拍拍手。",
+    "offset": 235102,
+    "samples": 160128,
+    "bytes": 87145,
+    "source": "User-approved text; Microsoft zh-CN-XiaoyiNeural; rate +7%, pitch +4Hz; long silences shortened",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  },
+  {
+    "cue_start": 18,
+    "cue_count": 6,
+    "title": "宝藏选手上线",
+    "caption": "请注意，请注意！本日宝藏选手已经上线。没错，说的就是你！你的认真和可爱，都有好好被看见哦。",
+    "offset": 322247,
+    "samples": 178560,
+    "bytes": 97176,
+    "source": "User-approved text; Microsoft zh-CN-XiaoyiNeural; rate +7%, pitch +4Hz; long silences shortened",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  },
+  {
+    "cue_start": 24,
+    "cue_count": 6,
+    "title": "烦恼暂时退场",
+    "caption": "烦恼小怪兽，今天先退下！你已经很努力啦。来，肩膀松一松，喝口水，我们慢慢打下一关。",
+    "offset": 419423,
+    "samples": 165888,
+    "bytes": 90279,
+    "source": "User-approved text; Microsoft zh-CN-XiaoyiNeural; rate +7%, pitch +4Hz; long silences shortened",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  },
+  {
+    "cue_start": 30,
+    "cue_count": 6,
+    "title": "夸夸快递到了",
+    "caption": "您的夸夸快递已送达！里面装着一大包勇气，两大包好运，还有一句，你真的很棒！请记得签收呀。",
+    "offset": 509702,
+    "samples": 165312,
+    "bytes": 89966,
+    "source": "User-approved text; Microsoft zh-CN-XiaoyiNeural; rate +7%, pitch +4Hz; long silences shortened",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  },
+  {
+    "cue_start": 36,
+    "cue_count": 7,
+    "title": "小步也算数",
+    "caption": "今天的进度条，哪怕只前进一小格，也算数！别人有别人的速度，你有你的小宇宙。按自己的节奏，出发吧。",
+    "offset": 599668,
+    "samples": 182016,
+    "bytes": 99056,
+    "source": "User-approved text; Microsoft zh-CN-XiaoyiNeural; rate +7%, pitch +4Hz; long silences shortened",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  },
+  {
+    "cue_start": 43,
+    "cue_count": 6,
+    "title": "允许充电一下",
+    "caption": "电量不足的可爱选手，请就近休息！你又不是永动机，当然可以充充电。休息好了，再闪闪发光。",
+    "offset": 698724,
+    "samples": 161856,
+    "bytes": 88085,
+    "source": "User-approved text; Microsoft zh-CN-XiaoyiNeural; rate +7%, pitch +4Hz; long silences shortened",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  },
+  {
+    "cue_start": 49,
+    "cue_count": 6,
+    "title": "不顺也没关系",
+    "caption": "今天有点不顺？那就先给自己一个抱抱。一次卡关，不代表你不行。调整一下小披风，咱们下次再来！",
+    "offset": 786809,
+    "samples": 159552,
+    "bytes": 86831,
+    "source": "User-approved text; Microsoft zh-CN-XiaoyiNeural; rate +7%, pitch +4Hz; long silences shortened",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  },
+  {
+    "cue_start": 55,
+    "cue_count": 6,
+    "title": "晚安小星星",
+    "caption": "今日营业结束！辛苦啦，闪闪发光的小星星。把没做完的事情放一放，现在是你的休息时间。晚安，明天见。",
+    "offset": 873640,
+    "samples": 187200,
+    "bytes": 101878,
+    "source": "User-approved text; Microsoft zh-CN-XiaoyiNeural; rate +7%, pitch +4Hz; long silences shortened",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  },
+  {
+    "cue_start": 61,
+    "cue_count": 0,
+    "title": "晨光来信",
+    "caption": "像清晨的第一束光，陪你轻轻出发。",
+    "offset": 975518,
+    "samples": 1412352,
+    "bytes": 768627,
+    "source": "Original composition; tools/compose_walkman_music.py",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  },
+  {
+    "cue_start": 61,
+    "cue_count": 0,
+    "title": "快乐小步",
+    "caption": "把心情调亮一点，跟着旋律向前。",
+    "offset": 1744145,
+    "samples": 1412352,
+    "bytes": 768627,
+    "source": "Original composition; tools/compose_walkman_music.py",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  },
+  {
+    "cue_start": 61,
+    "cue_count": 0,
+    "title": "月亮晚安",
+    "caption": "慢下来，让今天在柔软的音乐里收尾。",
+    "offset": 2512772,
+    "samples": 1412352,
+    "bytes": 768627,
+    "source": "Original composition; tools/compose_walkman_music.py",
+    "codec": "MP3 96 kbps mono 22050 Hz"
+  }
+]

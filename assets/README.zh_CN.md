@@ -52,3 +52,7 @@ python3 tools/generate_starbridge_fonts.py --check
 
 Starbridge 的原创旋律与音效由 `main/starbridge_sound.c` 实时合成，采用本仓库 MIT 许可；
 `tools/render_starbridge_audio.py` 可生成试听 WAV，输出到忽略的 `delivery/` 目录。
+
+## 随身听试听素材
+
+`music/walkman/audio.bin` 是有容量限制的 MP3 音频包，由 `music/walkman/playlist.json` 和 `main/walkman_tracks.c` 索引。三首原创纯音乐由 `tools/compose_walkman_music.py` 生成。九段语音使用 `tools/generate_walkman_voices.py`、微软晓伊神经网络声音及 `music/walkman-source/voice-scripts.json` 中的文案。超过 350 毫秒的长静音被缩短，保留 160 毫秒停顿。公开素材不包含商业歌曲录音及个人歌曲转写；可通过导入工具用于本地收听。`fonts/walkman_12.c`、`fonts/walkman_14.c` 和 `fonts/walkman_16.c` 是同一固定版本霞鹜文楷屏幕阅读版的新增子集，许可为 `fonts/OFL-WenKai.txt`。本地音乐导入见[随身听文档](../docs/walkman.zh_CN.md)。

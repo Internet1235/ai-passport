@@ -1,0 +1,32 @@
+{
+  "repository": "https://github.com/pschatzmann/codec-helix",
+  "path": "src/libhelix-mp3",
+  "files": {
+    "LICENSE.txt": "12e5372a9f61c1de2c9d3cca2d34e12f1aa7f654",
+    "RCSL.txt": "a809759a32cdd6a05151cb483598b961f449840a",
+    "RPSL.txt": "d040a452059dfa412f0f72c14c4a5f228ff6095c",
+    "assembly.h": "5e206ef410ae3d5e620c26f1bbfa03703e11fd1b",
+    "bitstream.c": "608c39cc70498f6c810801946e5b19d62bead08a",
+    "buffers.c": "08ac6fc296e5b6bc530ca5577e268fb17dd74932",
+    "coder.h": "59ef671210adf9985e25a20f6af0e8b68b5eac67",
+    "dct32.c": "990c733f18dcc62031ee27c9e7fc880754911201",
+    "dequant.c": "b989b7dee9a80e4b61981f7bffaef76bdda8ed55",
+    "dqchan.c": "3660426276c6fc40efc825d5677f061ea37c157d",
+    "huffman.c": "1292289fd748a15c7c932efdb5269899b267a136",
+    "hufftabs.c": "916e114f143274cf7d9ae75d6942a29e32170781",
+    "imdct.c": "b5c0f787b5fbbed1b9898a736dbdade7ac0a4498",
+    "mp3common.h": "0cd3172154c8457fce3fe515dff2a9b91c97d6c3",
+    "mp3dec.c": "c81addf7780f06e56ae67ac232c018626242d8c6",
+    "mp3dec.h": "cd6c2da29691e21cf1b5e99cdcf68703ebca7577",
+    "mp3tabs.c": "e4899c74e7d947077fb9223ee58e09ec091765d1",
+    "mpadecobjfixpt.h": "a8a5c40fea3bd68ba56237764460792f3587da6a",
+    "polyphase.c": "bd331dfebb77d3969d77787f89b0b9ca2d703e03",
+    "readme.txt": "69e5d42555f30b7a9219889f7283788a00451d98",
+    "scalfact.c": "85974ffe42facc8fd7743c4ee13b34d785b1a871",
+    "statname.h": "518e4c73f9a1e0b68392e564cc3fcd2f92b3f552",
+    "stproc.c": "4f6a751b49af83308b3757aaf5c1f62bfa9a1d70",
+    "subband.c": "9044e784cf676057fc109186fc4b4147b174934c",
+    "trigtabs.c": "13a6a8a7c96431b470533aa544569788cb6b4cb1"
+  },
+  "local_adapter": "utils/helix_memory.h maps allocation to malloc/free"
+}

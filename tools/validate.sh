@@ -14,6 +14,9 @@ run_static_checks() {
 
     python3 tools/check_repo.py
     python3 tools/generate_starbridge_fonts.py --check
+    python3 tools/generate_walkman_fonts.py --check
+    python3 tools/check_walkman_assets.py
+    PYTHONDONTWRITEBYTECODE=1 python3 tests/test_walkman_captions.py
 
     actionlint_bin="${ACTIONLINT_BIN:-}"
     if [[ -z "${actionlint_bin}" ]]; then
@@ -43,6 +46,8 @@ run_static_checks() {
         tests/test_bsp_display_rounding.c components/bsp/src/bsp_display_rounding.c \
         -o "${test_dir}/test_bsp_display_rounding"
     "${test_dir}/test_bsp_display_rounding"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain tests/test_walkman.c main/walkman.c -o "${test_dir}/test_walkman"
+    "${test_dir}/test_walkman"
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_deep_sleep_contract.py
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_verify_firmware.py
     rm -rf "${test_dir}"

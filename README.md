@@ -1,28 +1,18 @@
 English | [简体中文](README.zh_CN.md)
 
-# Pocket Sunshine
+# Pocket Sunshine Online
 
-An offline pocket player for FoloToy AI Passport: nine lively Mandarin pep talks and three original instrumental tracks, a soft cloud-themed screen, and local music import. The public edition uses generic greetings and includes no commercial recordings. Add your own local music and timed captions with the import tools. Speech uses Microsoft Xiaoyi neural synthesis, with extended pauses shortened.
+A pocket voice companion and offline music player. Speak about your day and hear a warm, playful reply, request a surprise pep talk, or take a break with the bundled local audio. The device connects directly to Qwen over Wi-Fi and works without a running computer.
 
-| Input | Action |
-| --- | --- |
-| UP / DOWN | Previous / next track |
-| OK | Play / pause |
-| Hold UP / DOWN | Increase / decrease volume |
-| Hold OK | Open settings / return to player |
+The independent offline release remains in `feature/energy-walkman`. This version is developed in `feature/energy-walkman-online`.
 
-Settings include five volume levels (0–100%), playlist repeat / track repeat / play-through, and a 15/30/60-minute playback timer. Track selection, volume and playback mode persist. Startup is paused, with the selected track at the beginning. The timer pauses audio; it does not power off the device.
+- Home: Up/Down selects a choice; OK opens it.
+- Conversation: OK starts recording, then OK sends it. Recording ends automatically after 20 seconds. During a reply, OK cancels it. Up/Down scrolls the reply.
+- Local player: Up/Down changes track; OK plays or pauses.
+- Hold Up/Down to adjust volume. Hold OK to return home; holding OK on home opens the local player.
 
-Read the [player guide](docs/walkman.md) for importing local MP3/M4A/WAV files, regenerating Chinese fonts, and testing. Use `--append` when importing a song to retain the pep talks. The Chinese UI uses LXGW WenKai Screen under the SIL OFL; asset provenance is in the [asset index](assets/README.md).
+All captions use 14 px type. The title is centered on the full screen, with battery status independently positioned at the top right. Twelve bundled audio tracks remain available offline.
 
-```bash
-# Activate ESP-IDF 5.5.3 first.
-./tools/validate.sh
-# Output: build/FoloToy-AI-Passport-full.bin
-```
+Open **Network settings** to create a temporary device hotspot. Connect a phone, visit `192.168.4.1`, and select a nearby 2.4 GHz Wi-Fi network from the automatically scanned list, then enter its password. Use Rescan to refresh the list; hidden networks have a manual entry option. First-time setup requires your own Qwen API Key; model service charges may apply. When a default Qwen key has been provisioned over USB, leave the key field blank to reuse it or enter a new key to replace it. Configuration is saved in the device's separate `wm_online` namespace. The key is absent from source code and distributable firmware. The microphone opens only after starting a recording; audio is sent directly to the configured Qwen service. Conversation context lasts for the voice session and is cleared when leaving it or when the connection is released after roughly 45 idle seconds. This application does not write transcripts or recordings to local storage.
 
-Hardware: ESP32-C3, 8 MB flash, no PSRAM, 240-by-320 display, three physical buttons and ES8311 audio. Streaming MP3 keeps memory use independent of song length. Firmware remains offline and requires no account or microphone.
-
-Development branch: `feature/energy-walkman`. The previous Starbridge game is documented in [its guide](docs/starbridge.md) and preserved on `feature/starbridge`.
-
-See [development guidance](AGENTS.md), [hardware guide](docs/hardware-design/AI_HARDWARE_DEVELOPMENT_GUIDE.md), and [documentation index](docs/README.md). Compilation, host tests, physical sound quality and battery life are separate validation results.
+Alternatively, use the private [USB configuration tool](tools/configure_walkman_online.py). See the [guide](docs/walkman.md) for setup, audio import and validation. Activate ESP-IDF 5.5.3 and run `./tools/validate.sh` to build and verify `build/FoloToy-AI-Passport-full.bin`. Build, host tests and device tests must be reported separately.

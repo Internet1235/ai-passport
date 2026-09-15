@@ -1,6 +1,6 @@
 <p align="right"><strong>简体中文</strong> · <a href="walkman.md">English</a></p>
 
-# 元气随身听
+# 元气随身听 · 联网版
 
 面向 AI Passport 的离线随身听，内置九段活泼中文夸夸和三首原创纯音乐。语音采用微软晓伊神经网络声音，并缩短了长停顿。公开版文案和语音使用通用称呼，个人录音保留在版本库之外。固件使用独立的 `walkman` NVS 命名空间，分段刷机时保留星桥接线的存档。
 
@@ -33,7 +33,7 @@ python3 tools/generate_walkman_fonts.py --font /absolute/path/LXGWWenKaiScreen.t
 
 使用[素材说明](../assets/README.zh_CN.md)中的固定版本霞鹜文楷屏幕阅读版 v1.522。标题或字幕改变后需重新生成字体。导入会统一响度、添加短淡入淡出，并编码为 96 kbps、22,050 Hz 单声道 MP3。最多 24 首，每首短于八分钟，编码后音频包总计不超过 6 MiB；固件布局校验是最终容量检查。不支持或超大的文件会报错，不会静默截断播放列表。播放从 Flash 每次解码 256 个采样，不把整首歌载入内存。
 
-运行 `python3 tools/generate_walkman_assets.py` 可通过 FFmpeg 重新打包源播放列表。重新生成语音时安装 `edge-tts` 并运行 `tools/generate_walkman_voices.py`，会将保存的夸夸文案发给微软合成；设备播放本身离线。原创纯音乐使用 `tools/compose_walkman_music.py` 重建。来源见[素材索引](../assets/README.zh_CN.md)。本应用在独立分支 `feature/energy-walkman` 开发。
+运行 `python3 tools/generate_walkman_assets.py` 可通过 FFmpeg 重新打包源播放列表。重新生成语音时安装 `edge-tts` 并运行 `tools/generate_walkman_voices.py`，会将保存的夸夸文案发给微软合成；本地播放无需联网，语音对话需要 Wi-Fi 和千问服务。原创纯音乐使用 `tools/compose_walkman_music.py` 重建。来源见[素材索引](../assets/README.zh_CN.md)。联网应用在独立分支 `feature/energy-walkman-online` 开发。
 
 ## 验证
 
@@ -50,3 +50,19 @@ USB 诊断命令：`?` 查看状态，`u/d/o` 模拟短按，`U/D/O` 模拟长�
 所有字幕行固定为 14 px，仅用颜色区分当前句；长句不会缩小字号或改变插图尺寸。歌曲字幕从本地音频转写并核对时间，保存为毫秒时间轴。字幕 JSON 数组中的每项包含 `ms` 和 `text`，通过播放列表的 `cues` 字段引用；每行不超过 14 个汉字。
 
 使用 `python3 tools/import_walkman_lrc.py song.lrc song.cues.json` 转换本地 LRC 歌词，再在本地播放列表条目中添加 `"cues": "song.cues.json"`。支持 LRC 时间偏移和同句的多个时间标记。超过 14 个字的行会明确报错，请拆分为分别计时的短句。导入后重新生成字库并运行完整验证，再刷机。社区固件仅包含内置的 12 首内容。
+
+## 联网陪伴
+
+新主页及对话操作见根目录 README。设备通过 TLS/WebSocket 直接调用千问实时语音协议。录音为 16 kHz 单声道 PCM，回复为 24 kHz 单声道 PCM。现有音频工作任务独占声卡，进出对话时切换采样格式；进入对话会暂停本地曲目并回到开头。关闭未使用的蓝牙，并限制 Wi-Fi 缓冲数量，为 TLS 留出内存；TLS 缓冲在连接期间持续保留，避免堆内存碎片。录音与播放在半双工模式下复用一个有界队列。录音使用 32 个音频包；释放上传缓冲后，播放额外增加 16 个包，开始前可缓冲约 640 毫秒，不挤占录音阶段的内存。额外存储在下一次录音或关闭连接前释放。语音连接失败会明确显示，仍可返回本地播放。
+
+14 px 文楷字库覆盖基本平面的中日韩汉字，支持生成式回应。文字支持上下翻阅；流式回应文字不是逐字对齐的歌词时间轴。本地夸夸仍使用同步字幕，通用文案不包含个人姓名。音频随 WebSocket 分片到达直接解码，使用 4 KiB 元数据缓冲和容量固定的 PCM 队列，不在内存中保存整包编码音频。传输消息上限为 128 KiB，压缩后的 JSON 元数据上限为 4 KiB。录音每 100 毫秒合并发送一组 PCM。WebSocket 缓冲为 4608 字节，使每次追加只占一个帧；WebSocket 收发缓冲在连接前预留，配合独立发送锁和 TCP_NODELAY；PCM 直接编码到上传消息，省去另一份原始录音副本。Wi-Fi 缓冲数量受限，附近网络列表仅在配网时分配内存。
+
+运行 `python3 tools/walkman_network_probe.py --port /dev/cu.usbmodemXXXXX --output /private/path/network-probe.json` 可对连接设备进行 20 秒上传检查。USB `z` 诊断生成静音数据，不读取麦克风，结束时关闭连接，不提交录音或请求回应。状态包含采集与上传采样数、单次追加的最大发送时间。检查通过不能代表语音识别或可听播放已验证。`tools/walkman_recovery_probe.py` 使用相同参数，在合成数据上传期间主动关闭套接字，验证资源清理以及一次新请求即可恢复。USB `x` 命令在合成诊断之外不起作用。主动取消和闲置关闭不报连接失败；意外失败保留第一个错误类别，释放失效连接，并保持麦克风关闭。`tools/walkman_online_soak.py` 会播放六轮快捷回应，并进行三次合成上传，包含同一连接内由回应切换到上传。运行前需提前说明；工具不会打开麦克风。当前对话仍为手动录音和发送，尚未实现自动判断说完及连续聆听。
+
+USB 配置需要 Python 和 pyserial。私密环境文件应包含 `DASHSCOPE_API_KEY`，可选 `QWEN_AUDIO_REALTIME_MODEL`。使用 `--setup` 私密保存默认密钥并打开 Wi-Fi 配网。手机连接屏幕显示的热点，访问 `192.168.4.1`，从扫描列表选择网络并填写密码；可重新搜索，隐藏网络支持手动输入。密钥框留空时复用默认值，填写新值可替换。使用 `--reuse-wifi` 复用设备 `wm_online` 或旧 `bean_online` 配置中的 Wi-Fi；也可以用 `--wifi-file` 传入包含 `ssid`、`password` 的私密文件。工具不会打印密钥或原始串口日志，且发送前会先确认设备运行的是联网固件。
+
+```bash
+python3 tools/configure_walkman_online.py --port /dev/cu.usbmodemXXXXX --env /private/path/config.env --setup
+```
+
+配置以长度受限、带版本号的 NVS 数据保存，与离线 `walkman` 及星桥接线存档分开。云端地址限于官方 DashScope TLS 域名，并校验证书。配网使用随机 WPA2 热点密码和每次启动生成的表单校验值。服务可用性、Wi-Fi 信号、云端延迟及实际麦克风/扬声器表现会影响实时体验。

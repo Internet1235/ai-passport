@@ -1,4 +1,6 @@
 #include "walkman_audio.h"
+#include "walkman_online.h"
+#include "online_state.h"
 #include "bsp_display.h"
 #include "bsp_button.h"
 #include "bsp_battery.h"
@@ -25,7 +27,7 @@ static const char *TAG="walkman";
 static QueueHandle_t inputs;
 static lv_obj_t *screen;
 static lv_display_t *display;
-static int page, view_page, selected, battery=-1;
+static int page=3, view_page, selected, battery=-1, voice_scroll=-1;
 static unsigned physical_seen;
 static wa_state view;
 static nvs_handle_t storage;
@@ -66,7 +68,7 @@ static void art_line(lv_layer_t *l,bool small,int x,int y,int ex,int ey,uint32_t
 static void draw(lv_event_t *e) {
     lv_layer_t *l=lv_event_get_layer(e);
     rectangle(l,184,18,34,18,0xe7eddf,0,8);
-    if(view_page) return;
+    if(view_page && view_page!=4) return;
     const bool small=true;
     art_rectangle(l,small,31,67,178,105,0xe9e6f6,0,22);
     art_rectangle(l,small,40,74,160,90,0xf0edfa,0,18);
@@ -90,6 +92,7 @@ static void draw(lv_event_t *e) {
             art_rectangle(l,small,101+(int)i*8,160-h,4,h,GREEN,0,2);
         }
     }
+    if(view_page==4){rectangle(l,17,167,206,68,CREAM,0,12);return;}
     if(small) rectangle(l,17,167,206,63,CREAM,0,12);
     rectangle(l,23,237,194,4,0xe6e1df,0,2);
     unsigned total=wm_tracks[view.player.track].samples;
@@ -113,10 +116,11 @@ static lv_obj_t *label(const char *text,int x,int y,int width,bool small,uint32_
 }
 static void refresh(void) {
     wa_state s=wa_status();
+    wn_state net=wn_status();
     if(!bsp_lvgl_lock(1000)) return;
     view=s; view_page=page; lv_obj_clean(screen);
     char text[160];
-    label("元气随身听",20,17,162,false,INK);
+    label("元气随身听",24,17,192,false,INK);
     if(battery>=0) snprintf(text,sizeof(text),"%d%%",battery); else snprintf(text,sizeof(text),"--%%");
     label(text,183,20,36,true,0x74866d);
     if(page==0) {
@@ -146,9 +150,45 @@ static void refresh(void) {
         label(text,60,247,120,true,MUTED);
         label("上一首",26,277,56,true,INK); label("下一首",158,277,56,true,INK);
         if(save_failed) snprintf(text,sizeof(text),"设置未保存，请稍后重试");
-        else if(s.player.timer_minutes) snprintf(text,sizeof(text),"%u 分钟后暂停 · 长按确定设置",(unsigned)((s.player.timer_left/WM_RATE+59)/60));
-        else snprintf(text,sizeof(text),"长按确定 · 打开设置");
+        else if(s.player.timer_minutes) snprintf(text,sizeof(text),"%u 分钟后暂停 · 长按确定返回",(unsigned)((s.player.timer_left/WM_RATE+59)/60));
+        else snprintf(text,sizeof(text),"长按确定 · 心情主页");
         label(text,19,305,202,true,MUTED);
+    } else if(page==3) {
+        label("一份随身的好心情",20,51,200,false,MUTED);
+        const char *items[]={"说说心情","惊喜夸夸","陪我放松","本地随身听","声音与定时","网络设置"};
+        for(int i=0;i<6;++i) {
+            lv_obj_t *o=label(items[i],24,82+i*32,192,false,INK);
+            lv_obj_set_style_bg_color(o,lv_color_hex(i==selected?ROSE:CREAM),0);
+            lv_obj_set_style_bg_opa(o,LV_OPA_COVER,0);lv_obj_set_style_radius(o,12,0);lv_obj_set_style_pad_ver(o,5,0);
+        }
+        label(net.wifi?"Wi-Fi 已连接 · 随时开聊":"本地音乐随时可听",20,282,200,true,MUTED);
+        label("上下选择 · 确定开始",20,300,200,true,MUTED);
+    } else if(page==4) {
+        static const char *names[]={"还差一步连接","正在连接","准备好了","你说，我在听","认真想一想","给你一点好心情","再试一次吧","连接设备热点"};
+        label(net.recording?"麦克风开启 · 最长二十秒":"联网陪伴 · 麦克风关闭",18,46,204,true,MUTED);
+        label(names[net.phase<=WN_SETUP?net.phase:WN_ERROR],19,141,202,false,INK);
+        char lines[48][ONLINE_LINE_BYTES];unsigned count=online_caption_lines(net.text,lines,48);
+        if(count) {
+            unsigned top=voice_scroll<0?(count>3?count-3:0):(unsigned)voice_scroll;
+            if(top>count-1)top=count-1;
+            for(unsigned i=0;i<3 && top+i<count;++i){lv_obj_t *o=label(lines[top+i],22,173+(int)i*20,196,true,INK);lv_obj_set_style_text_font(o,&walkman_14,0);lv_obj_set_height(o,20);}
+        } else {lv_obj_t *o=label(net.message,25,180,190,true,MUTED);lv_obj_set_style_text_font(o,&walkman_14,0);lv_obj_set_height(o,48);}
+        if(net.recording)snprintf(text,sizeof(text),"%u / 20 秒",net.seconds);else snprintf(text,sizeof(text),"上下翻阅回应 · 音量 %u%%",s.player.volume*25);
+        label(text,20,245,200,true,MUTED);
+        label(net.recording?"确定 · 说完发送":net.phase==WN_THINKING||net.phase==WN_SPEAKING?"确定 · 停止回应":"确定 · 开始说话",20,274,200,false,INK);
+        label("长按确定 · 心情主页",20,305,200,true,MUTED);
+    } else if(page==5) {
+        if(net.phase==WN_SETUP) {
+            label("用手机连接设备热点",20,65,200,false,INK);
+            label(net.message,20,104,200,false,MUTED);
+            label("连接后在浏览器打开\n192.168.4.1\n选择 Wi-Fi 并填写密码",20,174,200,false,INK);
+        } else {
+            label("连接 Wi-Fi，开启语音陪伴",20,65,200,false,INK);
+            label("设置会打开设备热点\n用手机选择 Wi-Fi 并填密码\n原有音乐和音量会保留",20,111,200,true,MUTED);
+            label(selected==0?"● 返回":"返回",30,203,180,false,selected==0?INK:MUTED);
+            label(selected==1?"● 开始配置":"开始配置",30,243,180,false,selected==1?INK:MUTED);
+        }
+        label("长按确定 · 心情主页",20,305,200,true,MUTED);
     } else if(page==1) {
         label("把喜欢的节奏调好",20,51,200,false,MUTED);
         for(int i=0;i<5;++i) {
@@ -166,7 +206,7 @@ static void refresh(void) {
         label("长按确定返回",20,295,200,true,MUTED);
     } else {
         label("随时给心情充充电",20,57,200,false,INK);
-        label("短按上/下：上一首/下一首\n短按确定：播放或暂停\n长按上/下：增加/降低音量\n长按确定：设置或返回\n\n定时按播放时间倒计时\n暂停时，倒计时也会暂停\n重启后按确定开始播放",25,96,190,false,MUTED);
+        label("短按上/下：上一首/下一首\n短按确定：播放或暂停\n长按上/下：增加/降低音量\n长按确定：心情主页\n\n定时按播放时间倒计时\n暂停时，倒计时也会暂停\n重启后按确定开始播放",25,96,190,false,MUTED);
         label("确定返回设置",20,285,200,true,INK);
     }
     lv_obj_invalidate(screen); bsp_lvgl_unlock();
@@ -174,13 +214,32 @@ static void refresh(void) {
 static void status(void) {
     wa_state s=wa_status();
     printf("WM_STATE {\"page\":%d,\"selected\":%d,\"cue\":%d,\"subtitle_px\":14,\"track\":%u,\"count\":%u,\"volume\":%u,\"repeat\":%u,\"timer\":%u,\"timer_left\":%lu,\"playing\":%s,\"position\":%lu,\"ready\":%s,\"failed\":%s,\"blocks\":%u,\"peak\":%u,\"max_gap_us\":%u,\"max_render_us\":%u,\"stack_free\":%u,\"dropped\":%u,\"save_ok\":%s,\"physical\":%u,\"heap\":%lu,\"min_heap\":%lu}\n",page,selected,wm_active_cue(s.player.track,s.player.position),s.player.track,wm_track_count,s.player.volume,s.player.repeat,s.player.timer_minutes,(unsigned long)s.player.timer_left,s.player.playing?"true":"false",(unsigned long)s.player.position,s.ready?"true":"false",s.failed?"true":"false",s.blocks,s.peak,s.max_gap_us,s.max_render_us,s.stack_free,s.dropped,storage_ready&&!save_failed?"true":"false",physical_seen,(unsigned long)esp_get_free_heap_size(),(unsigned long)esp_get_minimum_free_heap_size());
+    wn_state net=wn_status();
+    printf("WN_STATE {\"phase\":%u,\"wifi\":%s,\"configured\":%s,\"recording\":%s,\"played\":%u,\"dropped\":%u,\"starves\":%u,\"text_bytes\":%u,\"wifi_reason\":%u,\"testing\":%s,\"captured\":%u,\"uploaded\":%u,\"upload_ms\":%u,\"error_code\":%u,\"failures\":%u,\"connected\":%s,\"net_stack\":%u,\"ws_stack\":%u}\n",net.phase,net.wifi?"true":"false",net.configured?"true":"false",net.recording?"true":"false",net.played,net.dropped,net.starves,(unsigned)strlen(net.text),net.wifi_reason,net.testing?"true":"false",net.captured,net.uploaded,net.upload_ms,net.error_code,net.failures,net.connected?"true":"false",net.net_stack,net.ws_stack);
     fflush(stdout);
 }
 static void key(char c) {
     wm_player p=wa_status().player;
-    if(c=='O') { page=page?0:1; selected=0; return; }
+    if(c=='O') { if(page==4){wn_command(WN_CANCEL,0);wa_command(WA_NETWORK,0);}page=page==3?0:3;selected=0;return; }
     if(c=='U' || c=='D') { wa_command(WA_VOLUME,c=='U'?(p.volume<4?p.volume+1:4):(p.volume?p.volume-1:0)); return; }
     if(page==0) { if(c=='u') wa_command(WA_PREV,0); if(c=='d') wa_command(WA_NEXT,0); if(c=='o') wa_command(WA_TOGGLE,0); }
+    else if(page==3) {
+        if(c=='u')selected=(selected+5)%6;
+        if(c=='d')selected=(selected+1)%6;
+        if(c=='o') {
+            if(selected<3){if(wn_status().phase==WN_SETUP){page=5;return;}wa_command(WA_NETWORK,1);wn_command(selected==0?WN_RECORD:WN_QUICK,selected==2?1:0);page=4;voice_scroll=-1;}
+            else if(selected==3){wa_command(WA_NETWORK,0);page=0;}
+            else if(selected==4){page=1;selected=0;}
+            else{page=5;selected=0;}
+        }
+    } else if(page==4) {
+        wn_state net=wn_status();
+        if(c=='o'){voice_scroll=-1;if(net.recording)wn_command(WN_STOP,0);else if(net.phase==WN_THINKING || net.phase==WN_SPEAKING || net.phase==WN_CONNECTING)wn_command(WN_CANCEL,0);else wn_command(WN_RECORD,0);}
+        if(c=='u' || c=='d'){char lines[48][ONLINE_LINE_BYTES];unsigned count=online_caption_lines(net.text,lines,48);if(voice_scroll<0)voice_scroll=count>3?(int)count-3:0;voice_scroll+=c=='u'?-1:1;if(voice_scroll<0)voice_scroll=0;if(voice_scroll>(int)count-1)voice_scroll=count?(int)count-1:0;}
+    } else if(page==5) {
+        if(c=='u' || c=='d')selected^=1;
+        if(c=='o'){if(selected==1)wn_command(WN_CONFIGURE,0);else{page=3;selected=0;}}
+    }
     else if(page==1) {
         if(c=='u') selected=(selected+4)%5;
         if(c=='d') selected=(selected+1)%5;
@@ -210,7 +269,19 @@ static void on_button(bsp_btn_t b,bsp_btn_ev_t ev,void *arg) {
 }
 static void serial_task(void *arg) {
     (void)arg;
+    bool discard_line=false;
     for(;;) { int c=getchar(); if(c==EOF) { clearerr(stdin); vTaskDelay(pdMS_TO_TICKS(20)); continue; }
+        if(discard_line){if(c=='\n')discard_line=false;continue;}
+        if(c=='N') {
+            char raw[1024];size_t used=0;bool overflow=false;
+            int64_t deadline=esp_timer_get_time()+5000000;
+            for(;;){c=getchar();if(c=='\n')break;if(c==EOF){clearerr(stdin);if(esp_timer_get_time()>deadline){overflow=true;discard_line=true;break;}vTaskDelay(pdMS_TO_TICKS(5));continue;}if(used<sizeof(raw)-1)raw[used++]=(char)c;else overflow=true;}
+            raw[used]=0;bool ok=!overflow && wn_configure_json(raw);memset(raw,0,sizeof(raw));
+            printf("WM_CONFIGURED %s\n",ok?"true":"false");fflush(stdout);
+            if(ok){vTaskDelay(pdMS_TO_TICKS(200));esp_restart();}continue;
+        }
+        if(c=='x'){wn_command(WN_DROP_PROBE,0);continue;}
+        if(c=='z'){wa_command(WA_NETWORK,1);wn_command(WN_PROBE,0);continue;}
         if(strchr("udoUDO?cs",c)) { input_t in={(char)c,false}; xQueueSend(inputs,&in,portMAX_DELAY); }
     }
 }
@@ -257,7 +328,7 @@ static void capture(void) {
 }
 
 void app_main(void) {
-    usb_serial_jtag_driver_config_t usb={.tx_buffer_size=8192,.rx_buffer_size=256};
+    usb_serial_jtag_driver_config_t usb={.tx_buffer_size=2048,.rx_buffer_size=256};
     if(usb_serial_jtag_driver_install(&usb)==ESP_OK) usb_serial_jtag_vfs_use_driver();
     ESP_LOGI(TAG,"WALKMAN 1.0 BOOT");
     wm_player initial; wm_init(&initial);
@@ -281,6 +352,7 @@ void app_main(void) {
     lv_obj_add_event_cb(screen,draw,LV_EVENT_DRAW_MAIN,NULL);
     lv_display_add_event_cb(display,capture_event,LV_EVENT_FLUSH_START,NULL);
     lv_screen_load(screen); bsp_lvgl_unlock();
+    wn_start();
     if(!wa_start(&initial)) ESP_LOGE(TAG,"Audio worker unavailable");
     refresh(); bsp_display_backlight(65);
     ESP_ERROR_CHECK(bsp_button_init(on_button,NULL));

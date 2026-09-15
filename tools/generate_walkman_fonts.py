@@ -16,7 +16,7 @@ if not args.check:
         parser.error("--font is required for generation; see assets/README.md")
     if hashlib.sha256(args.font.read_bytes()).hexdigest() != "cd1a6fa39c4ea42fd8f4e289945789b0e510cf7016435640f8893cdad9b220f3":
         parser.error("font does not match the pinned v1.522 release")
-source = (ROOT / "main/walkman_app.c").read_text() + (ROOT / "main/walkman_tracks.c").read_text()
+source = "".join((ROOT / path).read_text() for path in ["main/walkman_app.c", "main/walkman_tracks.c", "main/online_setup.c", "main/walkman_online.c"])
 symbols = "".join(sorted({ch for ch in source if ord(ch) > 127}))
 for size in (12, 14, 16):
     name = f"walkman_{size}"
@@ -32,7 +32,7 @@ for size in (12, 14, 16):
     subprocess.run([
         "npx", "--yes", "lv_font_conv@1.5.3", "--size", str(size), "--bpp", "4",
         "--format", "lvgl", "--font", str(args.font),
-        "--symbols", symbols, "--range", "0x20-0x7e", "--no-compress", "--no-kerning",
+        "--symbols", symbols, "--range", "0x20-0x7e,0x4e00-0x9fff,0x3000-0x303f,0xff00-0xffef" if size==14 else "0x20-0x7e", "--no-compress", "--no-kerning",
         "--lv-include", "lvgl.h", "--lv-font-name", name, "-o", str(target),
     ], check=True)
     content = target.read_text().replace(str(args.font), "LXGWWenKaiScreen.ttf").replace(str(ROOT), "<repo>")

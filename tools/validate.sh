@@ -48,6 +48,14 @@ run_static_checks() {
     "${test_dir}/test_bsp_display_rounding"
     "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain tests/test_walkman.c main/walkman.c -o "${test_dir}/test_walkman"
     "${test_dir}/test_walkman"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain tests/test_online_state.c main/online_state.c -o "${test_dir}/test_online_state"
+    "${test_dir}/test_online_state"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain tests/test_online_stream.c main/online_stream.c -o "${test_dir}/test_online_stream"
+    "${test_dir}/test_online_stream"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain tests/test_online_upload.c main/online_upload.c -o "${test_dir}/test_online_upload"
+    "${test_dir}/test_online_upload"
+    "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Imain tests/test_online_queue.c main/online_queue.c -o "${test_dir}/test_online_queue"
+    "${test_dir}/test_online_queue"
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_deep_sleep_contract.py
     PYTHONDONTWRITEBYTECODE=1 python3 tests/test_verify_firmware.py
     rm -rf "${test_dir}"

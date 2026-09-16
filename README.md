@@ -1,10 +1,10 @@
 English | [简体中文](README.zh_CN.md)
 
-# Pocket Sunshine Online
+# Pocket Sunshine
 
 A pocket voice companion and offline music player. Speak about your day and hear a warm, playful reply, request a surprise pep talk, or take a break with the bundled local audio. The device connects directly to Qwen over Wi-Fi and works without a running computer.
 
-The independent offline release remains in `feature/energy-walkman`. This version is developed in `feature/energy-walkman-online`.
+The online companion extends the original [Pocket Sunshine community project](https://ai-passport.folotoy.cn/plays/434/) while retaining local playback. The current release branch is `feature/energy-walkman`; online development also remains available in `feature/energy-walkman-online`. The original offline release is preserved at [commit 03c4256](https://github.com/zhaoxiaoying00/ai-passport/tree/03c425680695ca30d6765fc80a90902a2c17df89).
 
 - Home: Up/Down selects a choice; OK opens it.
 - Conversation: OK starts recording, then OK sends it. Recording ends automatically after 20 seconds. During a reply, OK cancels it. Up/Down scrolls the reply.

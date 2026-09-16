@@ -1,10 +1,10 @@
 [English](README.md) | 简体中文
 
-# 元气随身听 · 联网版
+# 元气随身听
 
 可以听你说说今天的心情，用俏皮温暖的声音回应；也可以一键获得惊喜夸夸，或者听本地音乐放松。设备通过 Wi-Fi 直接连接千问，支持脱离电脑使用。
 
-已发布的独立离线版保留在 `feature/energy-walkman`，此版本单独开发于 `feature/energy-walkman-online`。
+联网陪伴作为原[元气随身听社区项目](https://ai-passport.folotoy.cn/plays/434/)的更新，保留本地播放功能。当前版本分支为 `feature/energy-walkman`，联网开发分支 `feature/energy-walkman-online` 同步保留。最初的离线版可从[提交 03c4256](https://github.com/zhaoxiaoying00/ai-passport/tree/03c425680695ca30d6765fc80a90902a2c17df89)获取。
 
 - 主页：上下键选择，确定键进入。
 - 对话页：按确定开始录音，再按确定发送；最长录音二十秒。回应过程中按确定可停止，上下键可翻阅回应文字。

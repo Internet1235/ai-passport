@@ -1,6 +1,6 @@
 <p align="right"><a href="walkman.zh_CN.md">简体中文</a> · <strong>English</strong></p>
 
-# Pocket Sunshine Online
+# Pocket Sunshine
 
 A voice companion with an offline audio player for AI Passport, with nine lively Mandarin pep talks and three original instrumental tracks. Speech uses Microsoft Xiaoyi neural synthesis with extended pauses shortened. Public copy and speech use generic greetings; personal recordings are kept outside the repository. Firmware uses a dedicated `walkman` NVS namespace, preserving the Starbridge namespace during segmented flashing.
 
@@ -33,7 +33,7 @@ python3 tools/generate_walkman_fonts.py --font /absolute/path/LXGWWenKaiScreen.t
 
 Use the pinned LXGW WenKai Screen v1.522 font described in [assets](../assets/README.md). Regenerate font subsets whenever titles or captions change. Import normalizes loudness, adds short edge fades and encodes 96 kbps, 22,050 Hz mono MP3. Maximum: 24 tracks, each shorter than eight minutes, combined encoded pack at most 6 MiB. Firmware layout verification is the final capacity check. Unsupported/oversized files fail without truncating the playlist. Playback streams 256-sample chunks from flash and never loads whole songs into RAM.
 
-Run `python3 tools/generate_walkman_assets.py` to repack the source playlist with FFmpeg. To regenerate speech, install `edge-tts` and run `tools/generate_walkman_voices.py`; it sends the stored pep-talk text to Microsoft for synthesis. Local playback is offline; voice conversation requires Wi-Fi and the Qwen service. Regenerate original instrumentals with `tools/compose_walkman_music.py`. See [asset index](../assets/README.md) for provenance. The online application is developed separately in branch `feature/energy-walkman-online`.
+Run `python3 tools/generate_walkman_assets.py` to repack the source playlist with FFmpeg. To regenerate speech, install `edge-tts` and run `tools/generate_walkman_voices.py`; it sends the stored pep-talk text to Microsoft for synthesis. Local playback is offline; voice conversation requires Wi-Fi and the Qwen service. Regenerate original instrumentals with `tools/compose_walkman_music.py`. See [asset index](../assets/README.md) for provenance. The online companion is an update to the original community project. Its release branch is `feature/energy-walkman`, with development also available in `feature/energy-walkman-online`.
 
 ## Validation
 

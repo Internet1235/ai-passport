@@ -1,8 +1,8 @@
 <p align="right"><strong>简体中文</strong> · <a href="walkman.md">English</a></p>
 
-# 元气随身听 · 联网版
+# 元气随身听
 
-面向 AI Passport 的离线随身听，内置九段活泼中文夸夸和三首原创纯音乐。语音采用微软晓伊神经网络声音，并缩短了长停顿。公开版文案和语音使用通用称呼，个人录音保留在版本库之外。固件使用独立的 `walkman` NVS 命名空间，分段刷机时保留星桥接线的存档。
+面向 AI Passport 的语音伙伴与离线随身听，内置九段活泼中文夸夸和三首原创纯音乐。语音采用微软晓伊神经网络声音，并缩短了长停顿。公开版文案和语音使用通用称呼，个人录音保留在版本库之外。固件使用独立的 `walkman` NVS 命名空间，分段刷机时保留星桥接线的存档。
 
 ## 操作
 
@@ -33,7 +33,7 @@ python3 tools/generate_walkman_fonts.py --font /absolute/path/LXGWWenKaiScreen.t
 
 使用[素材说明](../assets/README.zh_CN.md)中的固定版本霞鹜文楷屏幕阅读版 v1.522。标题或字幕改变后需重新生成字体。导入会统一响度、添加短淡入淡出，并编码为 96 kbps、22,050 Hz 单声道 MP3。最多 24 首，每首短于八分钟，编码后音频包总计不超过 6 MiB；固件布局校验是最终容量检查。不支持或超大的文件会报错，不会静默截断播放列表。播放从 Flash 每次解码 256 个采样，不把整首歌载入内存。
 
-运行 `python3 tools/generate_walkman_assets.py` 可通过 FFmpeg 重新打包源播放列表。重新生成语音时安装 `edge-tts` 并运行 `tools/generate_walkman_voices.py`，会将保存的夸夸文案发给微软合成；本地播放无需联网，语音对话需要 Wi-Fi 和千问服务。原创纯音乐使用 `tools/compose_walkman_music.py` 重建。来源见[素材索引](../assets/README.zh_CN.md)。联网应用在独立分支 `feature/energy-walkman-online` 开发。
+运行 `python3 tools/generate_walkman_assets.py` 可通过 FFmpeg 重新打包源播放列表。重新生成语音时安装 `edge-tts` 并运行 `tools/generate_walkman_voices.py`，会将保存的夸夸文案发给微软合成；本地播放无需联网，语音对话需要 Wi-Fi 和千问服务。原创纯音乐使用 `tools/compose_walkman_music.py` 重建。来源见[素材索引](../assets/README.zh_CN.md)。联网陪伴作为原社区项目的更新，版本分支为 `feature/energy-walkman`，开发分支 `feature/energy-walkman-online` 同步保留。
 
 ## 验证
 

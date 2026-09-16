@@ -273,10 +273,15 @@ static void serial_task(void *arg) {
     for(;;) { int c=getchar(); if(c==EOF) { clearerr(stdin); vTaskDelay(pdMS_TO_TICKS(20)); continue; }
         if(discard_line){if(c=='\n')discard_line=false;continue;}
         if(c=='N') {
-            char raw[1024];size_t used=0;bool overflow=false;
+            /* NVS writes need stack for flash/cache handling. Keep the
+             * bounded JSON input off the serial task's small stack. */
+            char *raw=malloc(1024);size_t used=0;bool overflow=raw==NULL;
             int64_t deadline=esp_timer_get_time()+5000000;
-            for(;;){c=getchar();if(c=='\n')break;if(c==EOF){clearerr(stdin);if(esp_timer_get_time()>deadline){overflow=true;discard_line=true;break;}vTaskDelay(pdMS_TO_TICKS(5));continue;}if(used<sizeof(raw)-1)raw[used++]=(char)c;else overflow=true;}
-            raw[used]=0;bool ok=!overflow && wn_configure_json(raw);memset(raw,0,sizeof(raw));
+            for(;;){c=getchar();if(c=='\n')break;if(c==EOF){clearerr(stdin);if(esp_timer_get_time()>deadline){overflow=true;discard_line=true;break;}vTaskDelay(pdMS_TO_TICKS(5));continue;}if(raw && used<1023)raw[used++]=(char)c;else overflow=true;}
+            if(raw)raw[used]=0;
+            bool ok=!overflow && wn_configure_json(raw);
+            if(raw){memset(raw,0,1024);free(raw);}
+            printf("WM_CONFIG_STACK %u\n",(unsigned)uxTaskGetStackHighWaterMark(NULL));
             printf("WM_CONFIGURED %s\n",ok?"true":"false");fflush(stdout);
             if(ok){vTaskDelay(pdMS_TO_TICKS(200));esp_restart();}continue;
         }

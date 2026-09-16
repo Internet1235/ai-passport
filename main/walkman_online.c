@@ -196,7 +196,15 @@ static void ws_event(void *arg,esp_event_base_t b,int32_t id,void *data) {
 static void wifi_event(void *arg,esp_event_base_t b,int32_t id,void *data) {
     (void)arg;
     if(b==IP_EVENT && id==IP_EVENT_STA_GOT_IP){atomic_store(&got_ip,true);portENTER_CRITICAL(&lock);state.wifi_reason=0;portEXIT_CRITICAL(&lock);}
-    if(b==WIFI_EVENT && id==WIFI_EVENT_STA_DISCONNECTED){wifi_event_sta_disconnected_t *info=data;portENTER_CRITICAL(&lock);state.wifi_reason=info?info->reason:0;portEXIT_CRITICAL(&lock);atomic_store(&got_ip,false);atomic_store(&recording,false);atomic_store(&allowed,false);phase(WN_CONNECTING,"Wi-Fi 断开，正在重连");}
+    if(b==WIFI_EVENT && id==WIFI_EVENT_STA_DISCONNECTED) {
+        wifi_event_sta_disconnected_t *info=data;
+        portENTER_CRITICAL(&lock);state.wifi_reason=info?info->reason:0;portEXIT_CRITICAL(&lock);
+        atomic_store(&got_ip,false);atomic_store(&recording,false);atomic_store(&allowed,false);
+        unsigned current=current_phase();
+        if(current==WN_LISTENING || current==WN_THINKING || current==WN_SPEAKING)
+            fail(WN_ERR_TRANSPORT,"Wi-Fi 断开，请重连后再试");
+        else {phase(WN_CONNECTING,"Wi-Fi 断开，正在重连");atomic_store(&failed,true);}
+    }
 }
 static bool read_blob(const char *space,online_config_t *c) {
     nvs_handle_t n;size_t size=sizeof(*c);if(nvs_open(space,NVS_READONLY,&n)!=ESP_OK)return false;
@@ -337,7 +345,7 @@ static void network_task(void *arg) {
                 if(nvs_open("wm_online",NVS_READWRITE,&n)==ESP_OK){nvs_set_u8(n,"setup",1);nvs_commit(n);nvs_close(n);esp_restart();}
                 fail(WN_ERR_SYSTEM,"暂时无法进入配置");continue;
             }
-            if(c.kind==WN_CANCEL){pending=-1;close_socket();clear_error();phase(configured?WN_READY:WN_UNCONFIGURED,"准备好听你说啦");continue;}
+            if(c.kind==WN_CANCEL){pending=-1;deadline=0;close_socket();clear_error();phase(configured?WN_READY:WN_UNCONFIGURED,"准备好听你说啦");continue;}
             if(c.kind==WN_DROP_PROBE) {
                 /* Fault injection only during synthetic diagnostics; never drop a real conversation. */
                 if(atomic_load(&synthetic) && atomic_load(&connected) && ws_transport){int fd=esp_transport_get_socket(ws_transport);if(fd>=0)shutdown(fd,SHUT_RDWR);}
@@ -373,8 +381,14 @@ static void network_task(void *arg) {
         packet p;if(!atomic_load(&failed) && upload_buffer && queue_pop(&p,pdMS_TO_TICKS(10)))upload(&p);
         if(atomic_load(&failed)){pending=-1;close_socket();deadline=0;}
         unsigned snapshot=current_phase();int64_t now=esp_timer_get_time();
+        /* Only an outstanding request owns a timeout. Idle Wi-Fi recovery
+         * must not inherit the deadline of an already completed reply. */
+        if(pending<0 && snapshot!=WN_THINKING)deadline=0;
+        if(pending<0 && !socket_handle && atomic_load(&got_ip) && snapshot==WN_CONNECTING) {
+            phase(WN_READY,"准备好听你说啦");snapshot=current_phase();
+        }
         if(snapshot==WN_READY){if(!idle_since)idle_since=now;if(socket_handle && now-idle_since>45000000){close_socket();phase(WN_READY,"准备好听你说啦");}}else idle_since=0;
-        if(deadline && now>deadline && (pending>=0 || snapshot==WN_THINKING || snapshot==WN_CONNECTING)){pending=-1;close_socket();fail(WN_ERR_TIMEOUT,"等待有点久，按确定重试");deadline=0;}
+        if(deadline && now>deadline && (pending>=0 || snapshot==WN_THINKING)){pending=-1;close_socket();fail(WN_ERR_TIMEOUT,"等待有点久，按确定重试");deadline=0;}
         portENTER_CRITICAL(&lock);state.net_stack=uxTaskGetStackHighWaterMark(NULL);portEXIT_CRITICAL(&lock);
         vTaskDelay(pdMS_TO_TICKS(5));
     }

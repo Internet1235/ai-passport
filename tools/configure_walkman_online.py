@@ -25,14 +25,19 @@ def main():
     raw=b'N'+json.dumps(payload,ensure_ascii=False,separators=(',',':')).encode()+b'\n'
     if len(raw)>1024:raise SystemExit('Configuration exceeds the device limit')
     with serial.Serial(args.port,115200,timeout=.2) as port:
-        port.reset_input_buffer();port.write(b'?');deadline=time.monotonic()+5;online=False
+        port.reset_input_buffer();port.write(b'\n?');deadline=time.monotonic()+8;next_query=time.monotonic()+1;online=False
         while time.monotonic()<deadline:
             if port.readline().startswith(b'WN_STATE '):online=True;break
+            if time.monotonic()>=next_query:port.write(b'?');next_query=time.monotonic()+1
         if not online:raise SystemExit('Flash the online firmware first; no credentials were sent')
-        port.write(raw);port.flush();deadline=time.monotonic()+8
+        # The device has a 256-byte USB RX ring. Pace larger configurations
+        # instead of relying on the reader winning every scheduling interval.
+        for offset in range(0,len(raw),32):port.write(raw[offset:offset+32]);port.flush();time.sleep(.02)
+        deadline=time.monotonic()+8
         while time.monotonic()<deadline:
             line=port.readline()
             if line.startswith(b'WM_CONFIGURED true'):print('Configuration saved privately; device is restarting.');return
             if line.startswith(b'WM_CONFIGURED false'):raise SystemExit('Configuration rejected. Saved Wi-Fi may be unavailable; use --wifi-file or on-device setup.')
+            if b'Guru Meditation' in line or b'Stack protection fault' in line:raise SystemExit('Device crashed while saving configuration; inspect firmware before retrying.')
     raise SystemExit('No configuration receipt. Check device state before retrying.')
 if __name__=='__main__':main()

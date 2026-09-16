@@ -82,8 +82,10 @@ static bool queue_push(const packet *p,TickType_t wait) {
     }while(true);
 }
 static void clear_audio_queue(void) {
-    portENTER_CRITICAL(&audio_lock);packet *extra=audio_queue.extra;
-    online_queue_reset(&audio_queue);online_queue_extend(&audio_queue,NULL,0);portEXIT_CRITICAL(&audio_lock);free(extra);
+    packet *extra[ONLINE_QUEUE_EXTRA];
+    portENTER_CRITICAL(&audio_lock);memcpy(extra,audio_queue.extra,sizeof(extra));
+    online_queue_reset(&audio_queue);online_queue_extend(&audio_queue,NULL,0);portEXIT_CRITICAL(&audio_lock);
+    for(unsigned i=0;i<ONLINE_QUEUE_EXTRA;++i)free(extra[i]);
 }
 static void phase(unsigned p,const char *message) {
     portENTER_CRITICAL(&lock);
@@ -227,10 +229,19 @@ static void configure_session(void) {
     cJSON_AddNullToObject(s,"turn_detection");cJSON_AddStringToObject(s,"input_audio_format","pcm");cJSON_AddStringToObject(s,"output_audio_format","pcm");cJSON_AddNumberToObject(s,"max_history_turns",6);send_json(j);
 }
 static bool prepare_playback(void) {
-    packet *extra=malloc(16*sizeof(*extra));
-    if(!extra){fail(WN_ERR_MEMORY,"网络内存不足");return false;}
-    portENTER_CRITICAL(&audio_lock);bool ok=online_queue_extend(&audio_queue,extra,16);portEXIT_CRITICAL(&audio_lock);
-    if(!ok){free(extra);fail(WN_ERR_PROTOCOL,"录音发送失败，请重试");}
+    ESP_LOGI(TAG,"playback reserve packets=%u packet_bytes=%u heap=%u largest=%u",ONLINE_QUEUE_EXTRA,(unsigned)sizeof(packet),(unsigned)esp_get_free_heap_size(),(unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_8BIT));
+    /* Codec/UI allocations fragment the heap during capture. Requiring one
+     * 10 KiB extent here failed despite more than 23 KiB total being free. */
+    packet *extra[ONLINE_QUEUE_EXTRA]={0};
+    for(unsigned i=0;i<ONLINE_QUEUE_EXTRA;++i) {
+        extra[i]=malloc(sizeof(*extra[i]));
+        if(!extra[i]) {
+            for(unsigned j=0;j<i;++j)free(extra[j]);
+            fail(WN_ERR_MEMORY,"网络内存不足");return false;
+        }
+    }
+    portENTER_CRITICAL(&audio_lock);bool ok=online_queue_extend(&audio_queue,extra,ONLINE_QUEUE_EXTRA);portEXIT_CRITICAL(&audio_lock);
+    if(!ok){for(unsigned i=0;i<ONLINE_QUEUE_EXTRA;++i)free(extra[i]);fail(WN_ERR_PROTOCOL,"录音发送失败，请重试");}
     return ok;
 }
 static void begin(unsigned kind,unsigned value) {
@@ -338,8 +349,8 @@ static void network_task(void *arg) {
                 free(upload_buffer);upload_buffer=NULL;
                 if(!uploaded){fail(WN_ERR_SEND,"录音发送失败，请重试");continue;}
                 if(received_samples<4000){fail(WN_ERR_SHORT_RECORD,"这次太短啦，再说一次吧");continue;}
-                if(atomic_load(&synthetic)){close_socket();phase(WN_READY,"准备好听你说啦");deadline=0;continue;}
                 if(!prepare_playback())continue;
+                if(atomic_load(&synthetic)){close_socket();phase(WN_READY,"准备好听你说啦");deadline=0;continue;}
                 if(!send_json(event("input_audio_buffer.commit")) || !send_json(event("response.create")))continue;
                 phase(WN_THINKING,"让我想想怎么回应你");deadline=esp_timer_get_time()+60000000;continue;
             }
@@ -376,8 +387,9 @@ bool wn_audio_step(unsigned volume) {
     unsigned generation=atomic_load(&epoch);
     if(current_epoch!=generation){current_epoch=generation;playing=false;prefill_since=0;skip_reads=4;next_capture=esp_timer_get_time();}
     if(atomic_load(&recording)) {
+        if(bsp_audio_set_format(16000,16,1)!=ESP_OK){fail(WN_ERR_AUDIO,"麦克风暂不可用");return false;}
         if(atomic_load(&synthetic)){next_capture+=20000;int64_t left=next_capture-esp_timer_get_time();if(left>0)vTaskDelay(pdMS_TO_TICKS((unsigned)(left+999)/1000));memset(p.pcm,0,PCM_BYTES);skip_reads=0;}
-        else if(bsp_audio_set_format(16000,16,1)!=ESP_OK || bsp_audio_read(p.pcm,PCM_BYTES)!=ESP_OK){fail(WN_ERR_AUDIO,"麦克风暂不可用");return false;}
+        else if(bsp_audio_read(p.pcm,PCM_BYTES)!=ESP_OK){fail(WN_ERR_AUDIO,"麦克风暂不可用");return false;}
         if(skip_reads){--skip_reads;return true;}
         if(!atomic_load(&recording) || generation!=atomic_load(&epoch))return true;
         p.len=PCM_BYTES;p.epoch=generation;p.done=false;p.input=true;received_samples+=PCM_BYTES/2;

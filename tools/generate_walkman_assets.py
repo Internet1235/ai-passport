@@ -46,7 +46,7 @@ def main():
             new_cues=reflow_captions(json.loads((args.playlist.parent/e['cues']).read_text())) if e.get('cues') else []
             start=len(cues)
             for cue in new_cues:
-                if not cue['text'] or len(cue['text'])>14: raise ValueError('Subtitle line too long')
+                if not cue['text'] or len(cue['text'])>50: raise ValueError('Subtitle line too long')
                 cues.append(dict(ms=cue['ms']+50,text=cue['text']))
             tracks.append(dict(cue_start=start,cue_count=len(new_cues),title=title,caption=caption,offset=len(pack),samples=samples,bytes=len(data),source=e.get('source','User supplied local audio; see local playlist'),codec='MP3 96 kbps mono 22050 Hz'))
             pack.extend(data)

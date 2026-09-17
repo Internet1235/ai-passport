@@ -1,3 +1,6 @@
 [
-  {"file": "Summer Boy_min.mp3", "title": "Summer Boy", "cues": "Summer Boy.json"}
+  {"file": "Summer Boy_min.mp3", "title": "Summer Boy", "cues": "Summer Boy.json"},
+  {"file": "怪可爱的_min.mp3", "title": "怪可爱的", "cues": "怪可爱的.json"},
+  {"file": "头号玩家_min.mp3", "title": "头号玩家", "cues": "头号玩家.json"},
+  {"file": "自夸小队_min.mp3", "title": "自夸小队", "cues": "自夸小队.json"}
 ]

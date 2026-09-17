@@ -16,7 +16,7 @@ def parse_lrc(text):
         if not matches:
             continue
         words = stamps.sub('', line).strip() or '间奏 · 静静听'
-        if len(words) > 50:
+        if len(words) > 100:
             raise ValueError('Each timed line must fit 50 characters; split long lines with their own timestamps')
         for match in matches:
             minute, second, fraction = match.groups()

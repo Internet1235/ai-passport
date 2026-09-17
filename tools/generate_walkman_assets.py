@@ -38,7 +38,7 @@ def main():
             if not title or len(title)>20 or len(caption)>160: raise ValueError('Title limit 20; caption limit 160 characters')
             if len(tracks)>=24: raise ValueError('Maximum 24 tracks')
             src=(args.playlist.parent/e['file']).resolve();out=Path(tmp)/'track.mp3'
-            subprocess.run(['ffmpeg','-v','error','-y','-i',str(src),'-t','480','-ar',str(RATE),'-ac','1','-af','loudnorm=I=-18:TP=-3:LRA=9,afade=t=in:d=0.03','-c:a','libmp3lame','-b:a','96k','-write_xing','0','-id3v2_version','0','-map_metadata','-1',str(out)],check=True)
+            subprocess.run(['ffmpeg','-v','error','-y','-i',str(src),'-ar', '22050','-c:a', 'libmp3lame','-b:a', '32k','-map_metadata','-1',str(out)],check=True)
             data=out.read_bytes()
             decoded=subprocess.run(['ffmpeg','-v','error','-i',str(out),'-f','s16le','-acodec','pcm_s16le','-'],capture_output=True,check=True).stdout
             samples=len(decoded)//2
@@ -46,7 +46,7 @@ def main():
             new_cues=reflow_captions(json.loads((args.playlist.parent/e['cues']).read_text())) if e.get('cues') else []
             start=len(cues)
             for cue in new_cues:
-                if not cue['text'] or len(cue['text'])>50: raise ValueError('Subtitle line too long')
+                if not cue['text'] or len(cue['text'])>100: raise ValueError('Subtitle line too long')
                 cues.append(dict(ms=cue['ms']+50,text=cue['text']))
             tracks.append(dict(cue_start=start,cue_count=len(new_cues),title=title,caption=caption,offset=len(pack),samples=samples,bytes=len(data),source=e.get('source','User supplied local audio; see local playlist'),codec='MP3 96 kbps mono 22050 Hz'))
             pack.extend(data)

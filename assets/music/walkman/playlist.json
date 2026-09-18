@@ -5,42 +5,42 @@
     "title": "Summer Boy",
     "caption": "我的音乐",
     "offset": 0,
-    "samples": 6529630,
-    "bytes": 1185036,
+    "samples": 6531264,
+    "bytes": 1184810,
     "source": "User supplied local audio; see local playlist",
-    "codec": "MP3 96 kbps mono 22050 Hz"
+    "codec": "MP3 32 kbps mono 22050 Hz"
   },
   {
     "cue_start": 151,
     "cue_count": 78,
     "title": "怪可爱的",
     "caption": "我的音乐",
-    "offset": 1185036,
-    "samples": 5811751,
-    "bytes": 1054737,
+    "offset": 1184810,
+    "samples": 5812992,
+    "bytes": 1054511,
     "source": "User supplied local audio; see local playlist",
-    "codec": "MP3 96 kbps mono 22050 Hz"
+    "codec": "MP3 32 kbps mono 22050 Hz"
   },
   {
     "cue_start": 229,
     "cue_count": 125,
     "title": "头号玩家",
     "caption": "我的音乐",
-    "offset": 2239773,
-    "samples": 5882349,
-    "bytes": 1067589,
+    "offset": 2239321,
+    "samples": 5883840,
+    "bytes": 1067363,
     "source": "User supplied local audio; see local playlist",
-    "codec": "MP3 96 kbps mono 22050 Hz"
+    "codec": "MP3 32 kbps mono 22050 Hz"
   },
   {
     "cue_start": 354,
     "cue_count": 94,
     "title": "自夸小队",
     "caption": "我的音乐",
-    "offset": 3307362,
-    "samples": 4860526,
-    "bytes": 882224,
+    "offset": 3306684,
+    "samples": 4862016,
+    "bytes": 881998,
     "source": "User supplied local audio; see local playlist",
-    "codec": "MP3 96 kbps mono 22050 Hz"
+    "codec": "MP3 32 kbps mono 22050 Hz"
   }
 ]
